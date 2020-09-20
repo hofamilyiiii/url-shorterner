@@ -1,6 +1,8 @@
 const admin = require("firebase-admin")
+
 const serviceAccount = require("../firebase-adminsdk-configs.json")
 const config = require("../configs.json")
+const { FirebaseError } = require("../errors/server-errors")
 
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount),
@@ -10,13 +12,19 @@ admin.initializeApp({
 const db = admin.firestore()
 const urlsCollectionRef = db.collection("urls")
 
+const errorHandler = error => {
+  return new FirebaseError(error.message, { errorCode: error.status })
+}
+
 module.exports.getUrlBySlug = slug => {
   return new Promise((resolve, reject) => {
     urlsCollectionRef
       .doc(slug)
       .get()
-      .then(response => resolve(response.data()))
-      .catch(reject)
+      .then(response => {
+        resolve(response.data())
+      })
+      .catch(error => reject(errorHandler(error)))
   })
 }
 
@@ -25,8 +33,10 @@ module.exports.getUrlByUrl = url => {
     urlsCollectionRef
       .where("url", "==", url)
       .get()
-      .then(response => resolve(response.data()))
-      .catch(reject)
+      .then(response => {
+        resolve(response.docs)
+      })
+      .catch(error => reject(errorHandler(error)))
   })
 }
 
@@ -38,14 +48,11 @@ module.exports.addUrl = newUrl => {
         url: newUrl.url,
         createdDate: admin.firestore.Timestamp.now(),
       })
-      .then(response => {
-        console.log(response)
-
+      .then(() => {
         resolve({
-          time: response.writeTime,
           data: newUrl,
-        })res
+        })
       })
-      .catch(reject)
+      .catch(error => reject(errorHandler(error)))
   })
 }

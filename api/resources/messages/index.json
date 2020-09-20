@@ -1,11 +1,18 @@
 {
+  "methods": {
+    "insert": "A01",
+    "update": "A02"
+  },
   "success": {
-    "add_url": "Successfully inserted URL."
+    "insert": "Insert URL successful."
   },
   "errors": {
-    "url_duplicated": {
-      "code": "A0001",
-      "message": "Possible duplicated url found."
+    "invalidSchema": {
+      "code": "X001"
+    },
+    "duplicated": {
+      "code": "X002",
+      "message": "Possible duplicated URL found."
     }
   }
 }
